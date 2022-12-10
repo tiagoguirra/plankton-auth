@@ -68,8 +68,6 @@ resources:
       Type: AWS::Cognito::UserPool
       Properties:
         UserPoolName: ${self:custom.${self:custom.stage}.userPool}
-        UsernameAttributes:
-          - email
         Schema:
           - Name: email
             Required: true
