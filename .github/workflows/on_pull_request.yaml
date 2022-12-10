@@ -1,0 +1,22 @@
+name: Pull request check
+on:
+  pull_request:
+    branches:
+      - "release/production"
+      - "release/staging"
+jobs:
+  test:
+    name: Run test & lint
+    runs-on:  ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install packages
+        uses: ./.github/actions/package
+
+      - name: Run jest & lint
+        uses: ./.github/actions/jest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,16 @@
+# package directories
+node_modules
+jspm_packages
+
+# Serverless directories
+.serverless
+
+.idea
+
+# Jest directories
+coverage
+
+# log files
+yarn-error.log
+test-report.xml
+.build

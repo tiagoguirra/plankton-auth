@@ -1,0 +1,51 @@
+name: Deploy release
+on:
+  push:
+    branches:
+      - "release/production"
+      - "release/staging"
+
+jobs:
+  test:
+    if: github.ref_name != 'release/staging'
+    name: Run test & lint
+    runs-on:  ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install packages
+        uses: ./.github/actions/package
+
+      - name: Run jest & lint
+        uses: ./.github/actions/jest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    needs: test
+    if: | 
+      always() &&
+      (needs.test.result == 'success' || needs.test.result == 'skipped')
+    name: Deploy release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get Environment name
+        id: environment-name
+        run: echo ::set-output name=environment::${{ github.ref_name }} | sed 's/release\///g'
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install packages
+        uses: ./.github/actions/package
+
+      - name: serverless deploy
+        uses: serverless/github-action@v3
+        with:
+          args: deploy --stage ${{ steps.environment-name.outputs.environment }} --force
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_PLANKTON_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_PLANKTON_SECRET_KEY_ID }}

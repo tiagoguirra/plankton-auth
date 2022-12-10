@@ -1,0 +1,12 @@
+name: Jest & lint
+description: 'Run jest &lint'
+runs:
+  using: "composite"
+  steps:
+    - name: Run jest
+      shell: bash
+      run: yarn test
+
+    - name: Run lint
+      shell: bash
+      run: yarn eslint . --ext .ts

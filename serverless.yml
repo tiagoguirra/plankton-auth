@@ -1,0 +1,97 @@
+service: plankton-auth
+
+
+package:
+  exclude: 
+    - data/**
+    - .vscode/**
+    - .idea/**
+    - README.md
+    - bin
+    - bitbucket-pipelines.yml
+    - .eslintrc
+    - jest-dynalite-config.js
+    - jest.config.json
+  individually: true
+
+custom:
+  stage: ${opt:stage, 'staging'}
+  region: 'sa-east-1'
+  serverless-offline:
+    port: 6000
+  esbuild:
+    bundle: true
+    sourcemap: true
+    minify: false
+    packager: yarn
+    watch:
+      pattern: 'src/**/*.ts'
+      ignore: '**/*.test.ts'
+  swaggerApi:
+    swagger: ${file(docs/swagger.yaml)}
+  staging:
+    stage: staging
+    logRetentionInDays: 5
+    userPool: plankton-pool-staging
+    userClient: plankton-client-staging
+  production:
+    stage: production
+    logRetentionInDays: 60
+    userPool: plankton-pool-production
+    userClient: plankton-client-production
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  versionFunctions: false
+  stage: ${self:custom.stage}
+  region: 'sa-east-1'
+  endpointType: REGIONAL
+  environment:
+    REGION: ${self:custom.region}
+    STAGE: ${self:custom.${self:custom.stage}.stage}
+    NODE_OPTIONS: --enable-source-maps
+    USER_POOL_ID: { Ref: UserPool }
+    USER_CLIENT_ID: { Ref: UserClient }
+  deploymentBucket:
+    name: serverless.tag.deployment
+
+functions:
+  signIn:
+    handler: src/functions/signIn.handler
+  signUp:
+    handler: src/functions/signUp.handler
+
+resources:
+  Resources:
+    UserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:custom.${self:custom.stage}.userPool}
+        Schema:
+          - Name: email
+            Required: true
+            Mutable: true
+          - Name: name
+            Required: true
+            Mutable: true
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+        AutoVerifiedAttributes: ["email"]
+
+    UserClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${self:custom.${self:custom.stage}.userClient}
+        GenerateSecret: false
+        UserPoolId: { Ref: UserPool }
+        AccessTokenValidity: 5
+        IdTokenValidity: 5
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+  - serverless-plugin-swagger-api
+  - serverless-plugin-log-retention
+  - serverless-iam-roles-per-function
