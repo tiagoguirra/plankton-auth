@@ -1,6 +1,9 @@
 import { CognitoIdentityServiceProvider } from 'aws-sdk'
-import { CognitoException, InvalidArgumentException } from '../types/exceptions'
-import { SignUp } from '../types/signup'
+import {
+  CognitoException,
+  InvalidArgumentException
+} from '../../types/exceptions'
+import { SignUp } from '../../types/signup'
 
 export class SignUpService {
   readonly cognito: CognitoIdentityServiceProvider

@@ -13,6 +13,8 @@ tags:
     description: Resources for register account
   - name: signin
     description: Resources for login
+  - name: openid
+    description: Openid wrapper
 
 paths:
   /signup:
@@ -65,7 +67,105 @@ paths:
       x-attr-serverless:
         functionName: signIn
         cors: true
-
+  /openid/github/authorize:
+    get:
+      summary: Authorizer route for github login
+      description: A wrapper openid for github login authorizer
+      tags:
+        - openid
+      parameters:
+        - name: "client_id"
+          in: "query"
+          required: true
+          description: "paramters for github oauth app"
+          schema:
+            type: string
+        - name: "scope"
+          in: "query"
+          required: true
+          description: "paramters for github oauth app"
+          schema:
+            type: string
+        - name: "state"
+          in: "query"
+          required: true
+          description: "paramters for github oauth app"
+          schema:
+            type: string
+        - name: "response_type"
+          in: "query"
+          required: true
+          description: "paramters for github oauth app"
+          schema:
+            type: string
+      responses:
+        '302': 
+          description: Redirect for github authorizer page
+        '400':
+          description: Bad request.
+        '401':
+          description: Not authorized.
+        '500':
+          description: Server internal error.
+      x-attr-serverless:
+        functionName: githubAuthorize
+        cors: true
+  /openid/github/token:
+    post:
+      summary: Token route for github login
+      description: A wrapper openid for github login
+      tags:
+        - openid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpenIdTokenRequest"
+      responses:
+        '200': 
+          description: Response with access tokens
+      x-attr-serverless:
+        functionName: githubToken
+        cors: true
+  /openid/github/userinfo:
+    post:
+      summary: User info route for github login
+      description: A wrapper openid for github login
+      tags:
+        - openid
+      responses:
+        '200': 
+          description: Response with user data
+        '400':
+          description: Bad request.
+        '401':
+          description: Not authorized.
+        '500':
+          description: Server internal error.
+      x-attr-serverless:
+        functionName: githubUser
+        cors: true
+  /openid/github/.well-known/jwks.json:
+    post:
+      summary: Jwks route for github login
+      description: A wrapper openid for github login
+      tags:
+        - openid
+      responses:
+        '200': 
+          description: Responde with certificate
+        '400':
+          description: Bad request.
+        '401':
+          description: Not authorized.
+        '500':
+          description: Server internal error.
+      x-attr-serverless:
+        functionName: githubJwks
+        cors: true
+  
+      
 components:
   schemas:
     SignUp:
@@ -98,4 +198,11 @@ components:
         ExpiresIn:
           type: number
         IdToken:
+          type: string
+    OpenIdTokenRequest:
+      type: object
+      properties:
+        code:
+          type: string
+        state:
           type: string

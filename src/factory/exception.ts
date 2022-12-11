@@ -14,7 +14,7 @@ const BadRequest = (
 ): ResponseError => {
   return {
     errorCode: 400,
-    errorType: 'InvalidParameterValue',
+    errorType: 'BadRequest',
     errorMessage: error.message || message
   }
 }
@@ -44,7 +44,7 @@ const Unauthorized = (
 ): ResponseError => {
   return {
     errorCode: 401,
-    errorType: 'AccessDeniedException',
+    errorType: 'AccessDenied',
     errorMessage: error.message || message
   }
 }
@@ -60,7 +60,7 @@ const BadValidation = (
   )
   return {
     errorCode: 400,
-    errorType: 'InvalidParameterValue',
+    errorType: 'BadValidation',
     errorMessage: detailsMessage || message
   }
 }
@@ -99,10 +99,10 @@ const resolveException = (
 
 export {
   resolveException,
-  BadRequest,
+  BadValidation,
   Conflict,
   NotFound,
   Unauthorized,
-  BadValidation,
+  BadRequest,
   ServerError
 }

@@ -8,14 +8,14 @@ import { resolveException } from './exception'
 import { responseError } from './response'
 
 describe('ErrorException suit test', () => {
-  it('InvalidParameterValue', () => {
+  it('BadRequest', () => {
     expect.assertions(1)
 
     expect(
       resolveException(new InvalidArgumentException('invalid'), 'invalid')
     ).toEqual({
       errorCode: 400,
-      errorType: 'InvalidParameterValue',
+      errorType: 'BadRequest',
       errorMessage: 'invalid'
     })
   })
@@ -51,7 +51,7 @@ describe('ErrorException suit test', () => {
       resolveException(new ErrorAuthenticateException('invalid'), 'invalid')
     ).toEqual({
       errorCode: 401,
-      errorType: 'AccessDeniedException',
+      errorType: 'AccessDenied',
       errorMessage: 'invalid'
     })
   })
@@ -76,7 +76,7 @@ describe('ErrorException suit test', () => {
         statusCode: 400,
         body: JSON.stringify(
           {
-            errorType: 'InvalidParameterValue',
+            errorType: 'BadRequest',
             errorMessage: 'invalid'
           },
           null,

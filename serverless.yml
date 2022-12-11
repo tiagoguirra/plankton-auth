@@ -18,7 +18,8 @@ custom:
   stage: ${opt:stage, 'staging'}
   region: 'sa-east-1'
   serverless-offline:
-    port: 6000
+    httpPort: 3000
+    noPrependStageInUrl: true
   esbuild:
     bundle: true
     sourcemap: true
@@ -34,11 +35,13 @@ custom:
     logRetentionInDays: 5
     userPool: plankton-pool-staging
     userClient: plankton-client-staging
+    secretGitHubId: plankton-staging/github
   production:
     stage: production
     logRetentionInDays: 60
     userPool: plankton-pool-production
     userClient: plankton-client-production
+    secretGitHubId: plankton-production/github
 
 provider:
   name: aws
@@ -53,6 +56,10 @@ provider:
     NODE_OPTIONS: --enable-source-maps
     USER_POOL_ID: { Ref: UserPool }
     USER_CLIENT_ID: { Ref: UserClient }
+    GITHUB_API_URL: https://api.github.com
+    GITHUB_LOGIN_URL: https://github.com
+    SECRET_GITHUB_ID: ${self:custom.${self:custom.stage}.secretGitHubId}
+    COGNITO_REDIRECT_URI: ''
   deploymentBucket:
     name: serverless.tag.deployment
 
@@ -61,6 +68,14 @@ functions:
     handler: src/functions/signIn.handler
   signUp:
     handler: src/functions/signUp.handler
+  githubAuthorize:
+    handler: src/functions/github/authorizer.handler
+  githubToken:
+    handler: src/functions/github/token.handler
+  githubUser:
+    handler: src/functions/github/userInfo.handler
+  githubJwks:
+    handler: src/functions/github/jwks.handler
 
 resources:
   Resources:
@@ -72,10 +87,6 @@ resources:
           - Name: email
             Required: true
             Mutable: true
-          - Name: name
-            Required: true
-            Mutable: true
-            AttributeDataType: String
         Policies:
           PasswordPolicy:
             MinimumLength: 6

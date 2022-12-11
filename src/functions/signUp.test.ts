@@ -1,5 +1,5 @@
 import { mockApiEvent } from '../mock/api.mock'
-import { SignUpService } from '../services/signUp.service'
+import { SignUpService } from '../services/signUp/signUp.service'
 import { InvalidArgumentException } from '../types/exceptions'
 import { handler } from './signUp'
 
@@ -44,7 +44,7 @@ describe('SignUpService suit test', () => {
     expect(response.body).toEqual(
       JSON.stringify(
         {
-          errorType: 'InvalidParameterValue',
+          errorType: 'BadValidation',
           errorMessage: '- "Confirm password" does not match\n'
         },
         null,
@@ -74,7 +74,7 @@ describe('SignUpService suit test', () => {
     expect(response.body).toEqual(
       JSON.stringify(
         {
-          errorType: 'InvalidParameterValue',
+          errorType: 'BadRequest',
           errorMessage: 'signup.UserAlreadyExists'
         },
         null,
