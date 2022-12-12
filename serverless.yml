@@ -30,6 +30,17 @@ custom:
       ignore: '**/*.test.ts'
   swaggerApi:
     swagger: ${file(docs/swagger.yaml)}
+  customDomain:
+    domainName: auth.api.planktondoc.com
+    stage: ${self:custom.stage}
+    basePath: ${self:custom.stage}
+    certificateName: 'planktondoc.com'
+    createRoute53Record: true
+    createRoute53IPv6Record: true
+    endpointType: REGIONAL
+    securityPolicy: tls_1_2
+    apiType: rest
+    autoDomain: true
   staging:
     stage: staging
     logRetentionInDays: 5
@@ -59,23 +70,47 @@ provider:
     GITHUB_API_URL: https://api.github.com
     GITHUB_LOGIN_URL: https://github.com
     SECRET_GITHUB_ID: ${self:custom.${self:custom.stage}.secretGitHubId}
-    COGNITO_REDIRECT_URI: ''
+    COGNITO_REDIRECT_URI: https://plankton.auth.sa-east-1.amazoncognito.com/oauth2/idpresponse # change for custom domain
   deploymentBucket:
     name: serverless.tag.deployment
 
 functions:
   signIn:
     handler: src/functions/signIn.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - cognito-idp:InitiateAuth
+        Resource:
+          - arn:aws:secretsmanager:sa-east-1:174628554481:secret:plankton-${self:custom.stage}/github-*
   signUp:
     handler: src/functions/signUp.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - cognito-idp:SignUp
+        Resource:
+          - arn:aws:secretsmanager:sa-east-1:174628554481:secret:plankton-${self:custom.stage}/github-*
   githubAuthorize:
     handler: src/functions/github/authorizer.handler
   githubToken:
     handler: src/functions/github/token.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - secretsmanager:GetSecretValue
+        Resource:
+          - arn:aws:secretsmanager:sa-east-1:174628554481:secret:plankton-${self:custom.stage}/github-*
   githubUser:
     handler: src/functions/github/userInfo.handler
   githubJwks:
     handler: src/functions/github/jwks.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - secretsmanager:GetSecretValue
+        Resource:
+          - arn:aws:secretsmanager:sa-east-1:174628554481:secret:plankton-${self:custom.stage}/github-*
 
 resources:
   Resources:
@@ -107,3 +142,4 @@ plugins:
   - serverless-plugin-swagger-api
   - serverless-plugin-log-retention
   - serverless-iam-roles-per-function
+  - serverless-domain-manager
