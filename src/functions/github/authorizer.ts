@@ -2,7 +2,10 @@ import { APIGatewayEvent } from 'aws-lambda'
 import { redirect } from '../../factory/response'
 import { ApiGatewayResponse } from '../../types/response'
 
-export const handler = async (event: APIGatewayEvent): Promise<ApiGatewayResponse> => {
+export const handler = async (
+  event: APIGatewayEvent
+): Promise<ApiGatewayResponse> => {
+  console.log(JSON.stringify(event, null, 2))
   const {
     client_id: clientId,
     scope,
