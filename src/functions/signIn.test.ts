@@ -1,6 +1,6 @@
 import { mockApiEvent } from '../mock/api.mock'
 import { mockAuthentication } from '../mock/cognito.mock'
-import { SignInService } from '../services/signIn.service'
+import { SignInService } from '../services/signIn/signIn.service'
 import { ErrorAuthenticateException } from '../types/exceptions'
 import { handler } from './signIn'
 
@@ -45,7 +45,7 @@ describe('SignInService suit test', () => {
     expect(response.body).toEqual(
       JSON.stringify(
         {
-          errorType: 'InvalidParameterValue',
+          errorType: 'BadValidation',
           errorMessage: '- "username" is required\n- "password" is required\n'
         },
         null,
@@ -71,7 +71,7 @@ describe('SignInService suit test', () => {
     expect(response.body).toEqual(
       JSON.stringify(
         {
-          errorType: 'AccessDeniedException',
+          errorType: 'AccessDenied',
           errorMessage: 'signin.NotAuthorized'
         },
         null,

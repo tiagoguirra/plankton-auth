@@ -1,4 +1,4 @@
-import { CognitoException, InvalidArgumentException } from '../types/exceptions'
+import { CognitoException, InvalidArgumentException } from '../../types/exceptions'
 import { SignUpService } from './signUp.service'
 
 describe('SignUpService suit test', () => {

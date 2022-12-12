@@ -2,8 +2,8 @@ import {
   CognitoException,
   ErrorAuthenticateException,
   NotFoundException
-} from '../types/exceptions'
-import { mockAuthentication } from '../mock/cognito.mock'
+} from '../../types/exceptions'
+import { mockAuthentication } from '../../mock/cognito.mock'
 import { SignInService } from './signIn.service'
 
 describe('SignInService suit test', () => {

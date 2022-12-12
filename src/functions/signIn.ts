@@ -1,6 +1,6 @@
 import { APIGatewayEvent } from 'aws-lambda'
 import { responseError, response } from '../factory/response'
-import { SignInService } from '../services/signIn.service'
+import { SignInService } from '../services/signIn/signIn.service'
 import { ApiGatewayResponse } from '../types/response'
 import { SignIn } from '../types/signin'
 import validation from '../validations/login'
@@ -18,6 +18,7 @@ export const handler = async (
 
     return response(authentication, 200)
   } catch (err) {
+    console.error(err)
     return responseError(err, 'Failure to authenticate')
   }
 }

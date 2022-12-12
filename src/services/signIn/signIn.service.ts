@@ -3,8 +3,8 @@ import {
   CognitoException,
   ErrorAuthenticateException,
   NotFoundException
-} from '../types/exceptions'
-import { AuthenticationResult, SignIn } from '../types/signin'
+} from '../../types/exceptions'
+import { AuthenticationResult, SignIn } from '../../types/signin'
 
 export class SignInService {
   readonly cognito: CognitoIdentityServiceProvider

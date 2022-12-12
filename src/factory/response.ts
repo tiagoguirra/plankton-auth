@@ -12,6 +12,15 @@ const response = (message: any, code: number): ApiGatewayResponse => {
   }
 }
 
+const redirect = (url: string): ApiGatewayResponse => {
+  return {
+    statusCode: 302,
+    headers: {
+      Location: url
+    }
+  }
+}
+
 const responseError = (
   error: CustomException | unknown,
   defaultMessage: string
@@ -21,5 +30,5 @@ const responseError = (
   return response(payload, errorCode)
 }
 
-export default { response, responseError }
-export { response, responseError }
+export default { response, redirect, responseError }
+export { response, redirect, responseError }

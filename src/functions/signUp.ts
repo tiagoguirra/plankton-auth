@@ -1,6 +1,6 @@
 import { APIGatewayEvent } from 'aws-lambda'
 import { responseError, response } from '../factory/response'
-import { SignUpService } from '../services/signUp.service'
+import { SignUpService } from '../services/signUp/signUp.service'
 import { ApiGatewayResponse } from '../types/response'
 import { SignUp } from '../types/signup'
 import validation from '../validations/register'
@@ -18,6 +18,7 @@ export const handler = async (
 
     return response({ message: 'User registred' }, 201)
   } catch (err) {
+    console.error(err)
     return responseError(err, 'Failure to register user')
   }
 }
