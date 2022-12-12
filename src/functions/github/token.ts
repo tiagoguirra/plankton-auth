@@ -9,6 +9,7 @@ export const handler = async (
   event: APIGatewayEvent
 ): Promise<ApiGatewayResponse> => {
   try {
+    console.log(JSON.stringify(event, null, 2))
     const { code, state }: OpenIDTokenRequest = JSON.parse(event.body)
     const issuer = getIssue(event.headers.Host, event.requestContext?.stage)
 

@@ -9,6 +9,7 @@ export const handler = async (
   event: APIGatewayEvent
 ): Promise<ApiGatewayResponse> => {
   try {
+    console.log(JSON.stringify(event, null, 2))
     const body = JSON.parse(event.body)
     const value = await validation.validateAsync(body, { abortEarly: false })
 

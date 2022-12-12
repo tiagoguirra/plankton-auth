@@ -7,6 +7,7 @@ export const handler = async (
   event: APIGatewayEvent
 ): Promise<ApiGatewayResponse> => {
   try {
+    console.log(JSON.stringify(event, null, 2))
     const accessToken = event.headers.Authorization
 
     const github = new GitHubService()
