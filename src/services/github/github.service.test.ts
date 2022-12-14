@@ -257,7 +257,8 @@ describe('GithubService suit test', () => {
       website: mockGitHubUser.blog,
       updated_at: 1670544042,
       email: mockGitHubUserEmails[0].email,
-      email_verified: mockGitHubUserEmails[0].verified
+      email_verified: mockGitHubUserEmails[0].verified,
+      token: mockGitHubAccessToken.access_token
     })
   })
 })

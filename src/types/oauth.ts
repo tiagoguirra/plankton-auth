@@ -15,6 +15,7 @@ export interface OAuthUser {
   website: string
   updated_at: number
   email_verified: boolean
+  token?: string
 }
 
 export interface OAuthService extends OAuthToken {
