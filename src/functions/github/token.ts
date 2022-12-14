@@ -4,13 +4,20 @@ import { GitHubService } from '../../services/github/github.service'
 import { OpenIDTokenRequest } from '../../types/openid'
 import { ApiGatewayResponse } from '../../types/response'
 import { getIssue } from '../../utils/oauth'
+import { parseBody } from '../../utils/parse'
 
 export const handler = async (
   event: APIGatewayEvent
 ): Promise<ApiGatewayResponse> => {
   try {
     console.log(JSON.stringify(event, null, 2))
-    const { code, state }: OpenIDTokenRequest = JSON.parse(event.body)
+
+    const body = parseBody<OpenIDTokenRequest>(event)
+    const query = event.queryStringParameters || {}
+
+    const code = body.code || query.code
+    const state = body.state || query.state
+
     const issuer = getIssue(event.headers.Host, event.requestContext?.stage)
 
     const github = new GitHubService()

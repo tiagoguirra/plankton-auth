@@ -128,8 +128,45 @@ paths:
       x-attr-serverless:
         functionName: githubToken
         cors: true
+    get:
+      summary: Token route for github login
+      description: A wrapper openid for github login
+      tags:
+        - openid
+      parameters:
+        - name: "code"
+          in: "query"
+          required: true
+          schema:
+            type: string
+        - name: "state"
+          in: "query"
+          required: true
+      responses:
+        '200': 
+          description: Response with access tokens
+      x-attr-serverless:
+        functionName: githubToken
+        cors: true
   /openid/github/userinfo:
     post:
+      summary: User info route for github login
+      description: A wrapper openid for github login
+      tags:
+        - openid
+      responses:
+        '200': 
+          description: Response with user data
+        '400':
+          description: Bad request.
+        '401':
+          description: Not authorized.
+        '500':
+          description: Server internal error.
+      x-attr-serverless:
+        functionName: githubUser
+        cors: true
+    get:
       summary: User info route for github login
       description: A wrapper openid for github login
       tags:
