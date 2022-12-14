@@ -1,23 +1,29 @@
 import axios from 'axios'
-import { GithubCredentials, GithubEmail, GithubUser } from '../../types/github'
+import {
+  GithubCredentials,
+  GithubEmail,
+  GithubError,
+  GithubUser
+} from '../../types/github'
 import { OAuthToken, OAuthUser } from '../../types/oauth'
-import { SecretManagerService } from '../secret/secret.service'
 import jwt from 'jsonwebtoken'
 import JSONWebKey from 'json-web-key'
 import { NumericDate } from '../../utils/date'
-import { OpenIDJwks } from '../../types/openid'
+import { OpenIDJwks, OpenIDTokenRequest } from '../../types/openid'
+import secretService from '../secret/secret.service'
+import certificateService from '../certificate/certificate.service'
+import { ErrorAuthenticateException } from '../../types/exceptions'
 
-export class GitHubService {
+class GitHubService {
   getCredentials(): Promise<GithubCredentials> {
-    const secretManager = new SecretManagerService()
-    return secretManager.getValue<GithubCredentials>(
-      process.env.SECRET_GITHUB_ID
+    return secretService.getValue<GithubCredentials>(
+      process.env.SECRET_GITHUB_ID,
+      true
     )
   }
 
   async getJwks(): Promise<OpenIDJwks> {
-    const { certificate_public: certificatePublic } =
-      await this.getCredentials()
+    const certificatePublic = await certificateService.public()
 
     const certificateKeys = JSONWebKey.fromPEM(certificatePublic).toJSON()
     const key = {
@@ -31,16 +37,12 @@ export class GitHubService {
     }
   }
 
-  generateIdToken(
-    clientId: string,
-    host: string,
-    certificatePublic: string
-  ): string {
+  generateIdToken(clientId: string, host: string, certificate: string): string {
     const payload = {
       iss: `https://${host}`,
       aud: clientId
     }
-    return jwt.sign(payload, certificatePublic, {
+    return jwt.sign(payload, certificate, {
       expiresIn: '1h',
       algorithm: 'RS256',
       keyid: 'jwtRS256'
@@ -48,26 +50,21 @@ export class GitHubService {
   }
 
   async accessToken(
-    code: string,
-    state: string,
+    client: OpenIDTokenRequest,
     issuer: string
   ): Promise<OAuthToken> {
-    const {
-      client_id: clientId,
-      client_secret: clientSecret,
-      certificate_public: certificatePublic
-    } = await this.getCredentials()
+    const certificate = await certificateService.key()
 
-    const { data } = await axios.post<OAuthToken>(
+    const { data } = await axios.post<OAuthToken | GithubError>(
       `${process.env.GITHUB_LOGIN_URL}/login/oauth/access_token`,
       {
         grant_type: 'authorization_code',
-        redirect_uri: process.env.COGNITO_REDIRECT_URI,
-        client_id: clientId,
-        client_secret: clientSecret,
+        redirect_uri: client.redirect_uri,
+        client_id: client.client_id,
+        client_secret: client.client_secret,
         response_type: 'code',
-        code,
-        state
+        code: client.code,
+        state: client.state
       },
       {
         headers: {
@@ -76,7 +73,13 @@ export class GitHubService {
         }
       }
     )
-    const idToken = this.generateIdToken(clientId, issuer, certificatePublic)
+
+    if ('error' in data) {
+      console.error(data)
+      throw new ErrorAuthenticateException(data.error_description)
+    }
+
+    const idToken = this.generateIdToken(client.client_id, issuer, certificate)
     const scope = `openid ${data.scope.replace(',', ' ')}`
 
     return {
@@ -95,12 +98,25 @@ export class GitHubService {
     }
 
     const [{ data: user }, { data: emails }] = await Promise.all([
-      axios.get<GithubUser>(`${process.env.GITHUB_API_URL}/user`, config),
-      axios.get<GithubEmail[]>(
+      axios.get<GithubUser | GithubError>(
+        `${process.env.GITHUB_API_URL}/user`,
+        config
+      ),
+      axios.get<GithubEmail[] | GithubError>(
         `${process.env.GITHUB_API_URL}/user/emails`,
         config
       )
     ])
+
+    if ('error' in user) {
+      console.error(user)
+      throw new ErrorAuthenticateException(user.error_description)
+    }
+
+    if ('error' in emails) {
+      console.error(emails)
+      throw new ErrorAuthenticateException(emails.error_description)
+    }
 
     const primaryEmail = emails.find((email) => email.primary)
 
@@ -120,3 +136,5 @@ export class GitHubService {
     }
   }
 }
+
+export default new GitHubService()

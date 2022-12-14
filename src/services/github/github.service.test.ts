@@ -1,22 +1,27 @@
-import { mockGitHubCredentials } from '../../mock/secret.mock'
-import { SecretManagerService } from '../secret/secret.service'
+import {
+  mockCertificateKey,
+  mockCertificatePub,
+  mockGitHubCredentials
+} from '../../mock/secret.mock'
 import JSONWebKey from 'json-web-key'
 import jwt from 'jsonwebtoken'
-import { GitHubService } from './github.service'
 import axios, { AxiosRequestConfig } from 'axios'
 import {
   mockGitHubAccessToken,
   mockGitHubUser,
   mockGitHubUserEmails
 } from '../../mock/github.mock'
+import secretService from '../secret/secret.service'
+import githubService from './github.service'
+import certificateService from '../certificate/certificate.service'
+import { ErrorAuthenticateException } from '../../types/exceptions'
 
 describe('GithubService suit test', () => {
-  const githubService = new GitHubService()
   const mockIdToken = 'eyJhbGciOi'
 
   beforeAll(() => {
     jest
-      .spyOn(SecretManagerService.prototype, 'getValue')
+      .spyOn(secretService, 'getValue')
       .mockResolvedValue(mockGitHubCredentials)
     jest
       .spyOn(JSONWebKey, 'fromPEM')
@@ -26,6 +31,14 @@ describe('GithubService suit test', () => {
       }))
 
     jest.spyOn(jwt, 'sign').mockReturnValue(mockIdToken)
+    jest
+      .spyOn(certificateService, 'public')
+      .mockResolvedValue(mockCertificatePub)
+    jest.spyOn(certificateService, 'key').mockResolvedValue(mockCertificateKey)
+  })
+
+  beforeEach(() => {
+    jest.clearAllMocks()
   })
 
   it('should return github credentials', async () => {
@@ -33,8 +46,9 @@ describe('GithubService suit test', () => {
 
     const response = await githubService.getCredentials()
 
-    expect(SecretManagerService.prototype.getValue).toHaveBeenCalledWith(
-      process.env.SECRET_GITHUB_ID
+    expect(secretService.getValue).toHaveBeenCalledWith(
+      process.env.SECRET_GITHUB_ID,
+      true
     )
     expect(response).toStrictEqual(mockGitHubCredentials)
   })
@@ -44,9 +58,7 @@ describe('GithubService suit test', () => {
 
     const jwk = await githubService.getJwks()
 
-    expect(JSONWebKey.fromPEM).toHaveBeenCalledWith(
-      mockGitHubCredentials.certificate_public
-    )
+    expect(JSONWebKey.fromPEM).toHaveBeenCalledWith(mockCertificatePub)
     expect(jwk).toStrictEqual({
       keys: [
         {
@@ -64,7 +76,7 @@ describe('GithubService suit test', () => {
     const idToken = githubService.generateIdToken(
       mockGitHubCredentials.client_id,
       'localhost',
-      mockGitHubCredentials.certificate_public
+      mockCertificateKey
     )
 
     expect(jwt.sign).toHaveBeenCalledWith(
@@ -72,7 +84,7 @@ describe('GithubService suit test', () => {
         iss: 'https://localhost',
         aud: mockGitHubCredentials.client_id
       },
-      mockGitHubCredentials.certificate_public,
+      mockCertificateKey,
       {
         expiresIn: '1h',
         algorithm: 'RS256',
@@ -90,22 +102,28 @@ describe('GithubService suit test', () => {
     })
 
     const accessToken = await githubService.accessToken(
-      '1f0d1b0c-1f0d-1b0c-1f0d-1b0c1f0d1b0c',
-      'as20j1kj13',
+      {
+        code: '132344',
+        state: 'as20j1kj13',
+        client_id: '48cb54f1-42fd-4a69-8797-b455e1060a7b',
+        client_secret: '48cb54f1-42fd-4a69-8797-b455e1060a7b',
+        grant_type: 'authorization_code',
+        redirect_uri: 'http://localhost:3000'
+      },
       'localhost'
     )
 
-    expect(SecretManagerService.prototype.getValue).toHaveBeenCalled()
+    expect(certificateService.key).toHaveBeenCalled()
     expect(jwt.sign).toHaveBeenCalled()
     expect(axios.post).toHaveBeenCalledWith(
       `${process.env.GITHUB_LOGIN_URL}/login/oauth/access_token`,
       {
         grant_type: 'authorization_code',
-        redirect_uri: process.env.COGNITO_REDIRECT_URI,
-        client_id: mockGitHubCredentials.client_id,
-        client_secret: mockGitHubCredentials.client_secret,
+        redirect_uri: 'http://localhost:3000',
+        client_id: '48cb54f1-42fd-4a69-8797-b455e1060a7b',
+        client_secret: '48cb54f1-42fd-4a69-8797-b455e1060a7b',
         response_type: 'code',
-        code: '1f0d1b0c-1f0d-1b0c-1f0d-1b0c1f0d1b0c',
+        code: '132344',
         state: 'as20j1kj13'
       },
       {
@@ -120,6 +138,78 @@ describe('GithubService suit test', () => {
       id_token: 'eyJhbGciOi',
       scope: 'openid user emails'
     })
+  })
+
+  it('should return exception from token response', async () => {
+    expect.assertions(1)
+
+    jest.spyOn(axios, 'post').mockResolvedValueOnce({
+      data: {
+        error: 'error',
+        error_description: 'Code is invalid'
+      }
+    })
+
+    await expect(
+      githubService.accessToken(
+        {
+          code: '0',
+          state: 'as20j1kj13',
+          client_id: '48cb54f1-42fd-4a69-8797-b455e1060a7b',
+          client_secret: '48cb54f1-42fd-4a69-8797-b455e1060a7b',
+          grant_type: 'authorization_code',
+          redirect_uri: 'http://localhost:3000'
+        },
+        'localhost'
+      )
+    ).rejects.toThrow(new ErrorAuthenticateException('Code is invalid'))
+  })
+
+  it('should return exception from userInfo response', async () => {
+    expect.assertions(1)
+    jest
+      .spyOn(axios, 'get')
+      .mockImplementation((url: string, config: AxiosRequestConfig<any>) => {
+        if (url.includes('user/emails')) {
+          return Promise.resolve({
+            data: mockGitHubUserEmails
+          })
+        }
+        return Promise.resolve({
+          data: {
+            error: 'error',
+            error_description: 'Token is invalid'
+          }
+        })
+      })
+
+    await expect(githubService.userInfo('token')).rejects.toThrow(
+      new ErrorAuthenticateException('Token is invalid')
+    )
+  })
+
+  it('should return exception from userEmail response', async () => {
+    expect.assertions(1)
+
+    jest
+      .spyOn(axios, 'get')
+      .mockImplementation((url: string, config: AxiosRequestConfig<any>) => {
+        if (url.includes('user/emails')) {
+          return Promise.resolve({
+            data: {
+              error: 'error',
+              error_description: 'Permission invalid'
+            }
+          })
+        }
+        return Promise.resolve({
+          data: mockGitHubUser
+        })
+      })
+
+    await expect(githubService.userInfo('token')).rejects.toThrow(
+      new ErrorAuthenticateException('Permission invalid')
+    )
   })
 
   it('should return user info', async () => {

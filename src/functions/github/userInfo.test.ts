@@ -1,6 +1,6 @@
 import { mockApiEvent } from '../../mock/api.mock'
 import { mockGitHubUser, mockGitHubUserEmails } from '../../mock/github.mock'
-import { GitHubService } from '../../services/github/github.service'
+import githubService from '../../services/github/github.service'
 import { ErrorAuthenticateException } from '../../types/exceptions'
 import { handler } from './userInfo'
 
@@ -18,18 +18,14 @@ describe('User info handler suit test', () => {
       email: mockGitHubUserEmails[0].email,
       email_verified: mockGitHubUserEmails[0].verified
     }
-    jest
-      .spyOn(GitHubService.prototype, 'userInfo')
-      .mockResolvedValue(mockUserInfo)
+    jest.spyOn(githubService, 'userInfo').mockResolvedValue(mockUserInfo)
     const response = await handler({
       ...mockApiEvent,
       headers: {
         Authorization: 'Bearer token'
       }
     })
-    expect(GitHubService.prototype.userInfo).toHaveBeenCalledWith(
-      'Bearer token'
-    )
+    expect(githubService.userInfo).toHaveBeenCalledWith('token')
     expect(response.statusCode).toEqual(200)
     expect(response.body).toEqual(JSON.stringify(mockUserInfo, null, 2))
   })
@@ -37,7 +33,7 @@ describe('User info handler suit test', () => {
   it('should return error for exception', async () => {
     expect.assertions(2)
     jest
-      .spyOn(GitHubService.prototype, 'userInfo')
+      .spyOn(githubService, 'userInfo')
       .mockRejectedValue(new ErrorAuthenticateException('Token expired'))
 
     const response = await handler({

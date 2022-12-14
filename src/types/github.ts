@@ -1,8 +1,6 @@
 export interface GithubCredentials {
   client_id: string
   client_secret: string
-  certificate_public: string
-  certificate_private: string
 }
 
 export interface GithubUser {
@@ -51,4 +49,9 @@ export interface GithubEmail {
   primary: boolean
   verified: boolean
   visibility: string
+}
+
+export interface GithubError {
+  error: string
+  error_description: string
 }

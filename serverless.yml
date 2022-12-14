@@ -47,12 +47,16 @@ custom:
     userPool: plankton-pool-staging
     userClient: plankton-client-staging
     secretGitHubId: plankton-staging/github
+    secretCertKey: plankton-staging/certificate.key
+    secretCertPub: plankton-staging/certificate.pub
   production:
     stage: production
     logRetentionInDays: 60
     userPool: plankton-pool-production
     userClient: plankton-client-production
     secretGitHubId: plankton-production/github
+    secretCertKey: plankton-production/certificate.key
+    secretCertPub: plankton-production/certificate.pub
 
 provider:
   name: aws
@@ -71,6 +75,8 @@ provider:
     GITHUB_LOGIN_URL: https://github.com
     SECRET_GITHUB_ID: ${self:custom.${self:custom.stage}.secretGitHubId}
     COGNITO_REDIRECT_URI: https://plankton.auth.sa-east-1.amazoncognito.com/oauth2/idpresponse # change for custom domain
+    SECRET_CERT_KEY: ${self:custom.${self:custom.stage}.secretCertKey}
+    SECRET_CERT_PUB: ${self:custom.${self:custom.stage}.secretCertPub}
   deploymentBucket:
     name: serverless.tag.deployment
 
@@ -82,7 +88,9 @@ functions:
         Action:
           - cognito-idp:InitiateAuth
         Resource:
-          - arn:aws:secretsmanager:sa-east-1:174628554481:secret:plankton-${self:custom.stage}/github-*
+          - Fn::GetAtt:
+              - UserPool
+              - Arn
   signUp:
     handler: src/functions/signUp.handler
     iamRoleStatements:
@@ -90,7 +98,9 @@ functions:
         Action:
           - cognito-idp:SignUp
         Resource:
-          - arn:aws:secretsmanager:sa-east-1:174628554481:secret:plankton-${self:custom.stage}/github-*
+          - Fn::GetAtt:
+              - UserPool
+              - Arn
   githubAuthorize:
     handler: src/functions/github/authorizer.handler
   githubToken:
@@ -100,7 +110,7 @@ functions:
         Action:
           - secretsmanager:GetSecretValue
         Resource:
-          - arn:aws:secretsmanager:sa-east-1:174628554481:secret:plankton-${self:custom.stage}/github-*
+          - arn:aws:secretsmanager:sa-east-1:174628554481:secret:plankton-${self:custom.stage}/certificate.key-*
   githubUser:
     handler: src/functions/github/userInfo.handler
   githubJwks:
@@ -110,7 +120,7 @@ functions:
         Action:
           - secretsmanager:GetSecretValue
         Resource:
-          - arn:aws:secretsmanager:sa-east-1:174628554481:secret:plankton-${self:custom.stage}/github-*
+          - arn:aws:secretsmanager:sa-east-1:174628554481:secret:plankton-${self:custom.stage}/certificate.pub-*
 
 resources:
   Resources:

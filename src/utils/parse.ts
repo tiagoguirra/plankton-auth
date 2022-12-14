@@ -2,7 +2,7 @@ import { APIGatewayEvent } from 'aws-lambda'
 import qs from 'querystring'
 
 const parseBody = <T = Object>(event: APIGatewayEvent): T => {
-  const contentType = event.headers['Content-Type']
+  const contentType = event.headers['Content-Type'] || ''
   if (event.body) {
     if (contentType.startsWith('application/x-www-form-urlencoded')) {
       return qs.parse(event.body) as T

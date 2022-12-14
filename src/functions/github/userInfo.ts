@@ -1,6 +1,6 @@
 import { APIGatewayEvent } from 'aws-lambda'
 import { response, responseError } from '../../factory/response'
-import { GitHubService } from '../../services/github/github.service'
+import githubService from '../../services/github/github.service'
 import { ErrorAuthenticateException } from '../../types/exceptions'
 import { ApiGatewayResponse } from '../../types/response'
 import { parseToken } from '../../utils/parse'
@@ -16,9 +16,7 @@ export const handler = async (
       throw new ErrorAuthenticateException('Access token is not found')
     }
 
-    const github = new GitHubService()
-
-    const userInfo = await github.userInfo(accessToken)
+    const userInfo = await githubService.userInfo(accessToken)
 
     return response(userInfo, 200)
   } catch (err) {

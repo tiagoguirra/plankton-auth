@@ -1,6 +1,6 @@
 import { APIGatewayEvent } from 'aws-lambda'
 import { response, responseError } from '../../factory/response'
-import { GitHubService } from '../../services/github/github.service'
+import githubService from '../../services/github/github.service'
 import { ApiGatewayResponse } from '../../types/response'
 
 export const handler = async (
@@ -8,9 +8,8 @@ export const handler = async (
 ): Promise<ApiGatewayResponse> => {
   try {
     console.log(JSON.stringify(event, null, 2))
-    const github = new GitHubService()
 
-    const jwks = await github.getJwks()
+    const jwks = await githubService.getJwks()
 
     return response(jwks, 200)
   } catch (err) {
