@@ -1,11 +1,11 @@
 import { mockApiEvent } from '../../mock/api.mock'
-import { GitHubService } from '../../services/github/github.service'
+import githubService from '../../services/github/github.service'
 import { handler } from './jwks'
 
 describe('Json web keys handler suit test', () => {
   it('should return keys', async () => {
     expect.assertions(2)
-    jest.spyOn(GitHubService.prototype, 'getJwks').mockResolvedValue({
+    jest.spyOn(githubService, 'getJwks').mockResolvedValue({
       keys: [
         {
           alg: 'RS256',
@@ -36,9 +36,7 @@ describe('Json web keys handler suit test', () => {
 
   it('should return error for exception', async () => {
     expect.assertions(2)
-    jest
-      .spyOn(GitHubService.prototype, 'getJwks')
-      .mockRejectedValue(new Error('error'))
+    jest.spyOn(githubService, 'getJwks').mockRejectedValue(new Error('error'))
 
     const response = await handler(mockApiEvent)
 

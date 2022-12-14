@@ -184,7 +184,7 @@ paths:
         functionName: githubUser
         cors: true
   /openid/github/.well-known/jwks.json:
-    post:
+    get:
       summary: Jwks route for github login
       description: A wrapper openid for github login
       tags:

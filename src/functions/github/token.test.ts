@@ -1,13 +1,13 @@
 import { mockApiEvent } from '../../mock/api.mock'
 import { mockGitHubAccessToken } from '../../mock/github.mock'
-import { GitHubService } from '../../services/github/github.service'
+import githubService from '../../services/github/github.service'
 import { InvalidArgumentException } from '../../types/exceptions'
 import { handler } from './token'
 
 describe('Json web keys handler suit test', () => {
   it('should return access token', async () => {
     expect.assertions(3)
-    jest.spyOn(GitHubService.prototype, 'accessToken').mockResolvedValue({
+    jest.spyOn(githubService, 'accessToken').mockResolvedValue({
       ...mockGitHubAccessToken,
       id_token: 'eyJhbGciOi',
       scope: 'openid user emails'
@@ -15,7 +15,8 @@ describe('Json web keys handler suit test', () => {
     const response = await handler({
       ...mockApiEvent,
       headers: {
-        Host: 'localhost:3000'
+        Host: 'localhost:3000',
+        'Content-Type': 'application/json'
       },
       requestContext: {
         ...mockApiEvent.requestContext,
@@ -23,12 +24,22 @@ describe('Json web keys handler suit test', () => {
       },
       body: JSON.stringify({
         code: '132344',
-        state: 'as20j1kj13'
+        state: 'as20j1kj13',
+        client_id: '48cb54f1-42fd-4a69-8797-b455e1060a7b',
+        client_secret: '48cb54f1-42fd-4a69-8797-b455e1060a7b',
+        grant_type: 'authorization_code',
+        redirect_uri: 'http://localhost:3000'
       })
     })
-    expect(GitHubService.prototype.accessToken).toHaveBeenCalledWith(
-      '132344',
-      'as20j1kj13',
+    expect(githubService.accessToken).toHaveBeenCalledWith(
+      {
+        code: '132344',
+        state: 'as20j1kj13',
+        client_id: '48cb54f1-42fd-4a69-8797-b455e1060a7b',
+        client_secret: '48cb54f1-42fd-4a69-8797-b455e1060a7b',
+        grant_type: 'authorization_code',
+        redirect_uri: 'http://localhost:3000'
+      },
       'localhost:3000/test'
     )
 
@@ -49,7 +60,7 @@ describe('Json web keys handler suit test', () => {
   it('should return error for exception', async () => {
     expect.assertions(2)
     jest
-      .spyOn(GitHubService.prototype, 'accessToken')
+      .spyOn(githubService, 'accessToken')
       .mockRejectedValue(new InvalidArgumentException('Error  from github'))
 
     const response = await handler({
@@ -63,7 +74,11 @@ describe('Json web keys handler suit test', () => {
       },
       body: JSON.stringify({
         code: '132344',
-        state: 'as20j1kj13'
+        state: 'as20j1kj13',
+        client_id: '48cb54f1-42fd-4a69-8797-b455e1060a7b',
+        client_secret: '48cb54f1-42fd-4a69-8797-b455e1060a7b',
+        grant_type: 'authorization_code',
+        redirect_uri: 'http://localhost:3000'
       })
     })
 

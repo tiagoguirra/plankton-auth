@@ -1,4 +1,4 @@
-import { SecretManagerService } from './secret.service'
+import secretService from './secret.service'
 
 describe('SecretService suit test', () => {
   afterEach(() => {
@@ -7,8 +7,6 @@ describe('SecretService suit test', () => {
 
   it('should return token from secret string value', async () => {
     expect.assertions(2)
-
-    const secretService = new SecretManagerService()
 
     jest
       .spyOn(secretService.instance, 'getSecretValue')
@@ -19,7 +17,7 @@ describe('SecretService suit test', () => {
         )
       }))
 
-    const response = await secretService.getValue('secretId')
+    const response = await secretService.getValue('secretId', true)
     expect(secretService.instance.getSecretValue).toBeCalledWith({
       SecretId: 'secretId'
     })
@@ -29,8 +27,6 @@ describe('SecretService suit test', () => {
 
   it('should return token from secret string base64', async () => {
     expect.assertions(2)
-
-    const secretService = new SecretManagerService()
 
     jest
       .spyOn(secretService.instance, 'getSecretValue')
@@ -43,7 +39,7 @@ describe('SecretService suit test', () => {
         )
       }))
 
-    const response = await secretService.getValue('secretId')
+    const response = await secretService.getValue('secretId', true)
 
     expect(response).toStrictEqual({ token: 'tokenInBase64' })
     expect(secretService.instance.getSecretValue).toBeCalledWith({
