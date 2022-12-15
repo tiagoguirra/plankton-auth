@@ -132,7 +132,8 @@ class GitHubService {
         Date.parse(user.updated_at)
       ),
       email: primaryEmail.email,
-      email_verified: primaryEmail.verified
+      email_verified: primaryEmail.verified,
+      token: accessToken
     }
   }
 }
