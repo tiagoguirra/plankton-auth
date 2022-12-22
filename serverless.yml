@@ -70,10 +70,7 @@ provider:
     USER_CLIENT_ID: { Ref: UserClient }
     GITHUB_API_URL: https://api.github.com
     GITHUB_LOGIN_URL: https://github.com
-    SECRET_GITHUB_ID: ${self:custom.${self:custom.stage}.secretGitHubId}
-    COGNITO_REDIRECT_URI: https://plankton.auth.sa-east-1.amazoncognito.com/oauth2/idpresponse # change for custom domain
-    SECRET_CERT_KEY: ${self:custom.${self:custom.stage}.secretCertKey}
-    SECRET_CERT_PUB: ${self:custom.${self:custom.stage}.secretCertPub}
+    COGNITO_REDIRECT_URI: https://plankton.auth.sa-east-1.amazoncognito.com/oauth2/idpresponse
     GITHUB_CERT_PUBLIC: github.pub
     GITHUB_CERT_KEY: github.key
   deploymentBucket:
