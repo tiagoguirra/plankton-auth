@@ -1,12 +1,19 @@
-import secretService from '../secret/secret.service'
+import fs from 'fs'
+import path from 'path'
 
 class CertificateService {
   async public(): Promise<string> {
-    return secretService.getValue(process.env.SECRET_CERT_PUB)
+    return fs.readFileSync(
+      path.resolve(process.cwd(), process.env.GITHUB_CERT_PUBLIC),
+      'utf8'
+    )
   }
 
   async key(): Promise<string> {
-    return secretService.getValue(process.env.SECRET_CERT_KEY)
+    return fs.readFileSync(
+      path.resolve(process.cwd(), process.env.GITHUB_CERT_KEY),
+      'utf8'
+    )
   }
 }
 

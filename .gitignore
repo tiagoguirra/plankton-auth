@@ -14,3 +14,7 @@ coverage
 yarn-error.log
 test-report.xml
 .build
+
+# certificate files
+*.key
+*key.pub
