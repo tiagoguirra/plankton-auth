@@ -42,6 +42,13 @@ jobs:
       - name: Install packages
         uses: ./.github/actions/package
 
+      - name: Write Github certificate
+        uses: ./.github/actions/certificate
+        with:
+          cert-name: github
+          cert-key: ${{ secrets.GITHUBT_CERTIFICATE_KEY }}
+          cert-pub: ${{ secrets.GITHUBT_CERTIFICATE_PUB }}
+
       - name: serverless deploy
         uses: serverless/github-action@v3
         with:

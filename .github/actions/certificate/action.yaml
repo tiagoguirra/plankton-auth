@@ -1,0 +1,28 @@
+name: Write certificates
+description: 'Write public and private certificate files'
+inputs:
+  cert-key:
+    description: Private certificate string value.
+    required: true
+  cert-pub:
+    description: Public certificate string value.
+    required: true
+  cert-name:
+    description: Certificate file name
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Write key
+      shell: bash
+      env:
+        CERT_KEY: ${{ inputs.cert-key }}
+      run: |
+        echo "$CERT_KEY" | base64 --decode > ${HOME}/${{ inputs.cert-key }}.key
+
+    - name: Write pub
+      shell: bash
+      env:
+        CERT_KEY: ${{ inputs.cert-pub }}
+      run: |
+        echo "$CERT_KEY" | base64 --decode > ${HOME}/${{ inputs.cert-key }}.key.pub

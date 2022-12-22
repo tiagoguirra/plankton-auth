@@ -17,56 +17,6 @@ tags:
     description: Openid wrapper
 
 paths:
-  /signup:
-    post:
-      summary: Register user accounnt
-      description: Register a user account
-      tags:
-        - signup
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SignUp"
-      responses:
-        '201':
-          description: 'Register sucessfull'
-        '400':
-          description: Bad request.
-        '500':
-          description: Server internal error.
-      x-attr-serverless:
-        functionName: signUp
-        cors: true
-  /signin:
-    post:
-      summary: Login user accounnt
-      description: Login a user account
-      tags:
-        - signup
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SignIn"
-      responses:
-        '200':
-          description: 'Login sucessfull'
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Authentication"
-        '400':
-          description: Bad request.
-        '401':
-          description: Not authorized.
-        '500':
-          description: Server internal error.
-      x-attr-serverless:
-        functionName: signIn
-        cors: true
   /openid/github/authorize:
     get:
       summary: Authorizer route for github login
@@ -205,24 +155,6 @@ paths:
       
 components:
   schemas:
-    SignUp:
-      type: object
-      properties:
-        email:
-          type: string
-        password:
-          type: string
-        name:
-          type: string
-        confirmPassword:
-          type: string
-    SignIn:
-      type: object
-      properties:
-        username:
-          type: string
-        password:
-          type: string
     Authentication:
       type: object
       properties:
