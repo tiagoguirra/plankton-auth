@@ -17,4 +17,4 @@ test-report.xml
 
 # certificate files
 *.key
-*key.pub
+*.pub

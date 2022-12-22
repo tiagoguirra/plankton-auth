@@ -25,4 +25,4 @@ runs:
       env:
         CERT_KEY: ${{ inputs.cert-pub }}
       run: |
-        echo "$CERT_KEY" | base64 --decode > ${HOME}/${{ inputs.cert-key }}.key.pub
+        echo "$CERT_KEY" | base64 --decode > ${HOME}/${{ inputs.cert-key }}.pub

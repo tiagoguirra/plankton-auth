@@ -14,7 +14,7 @@ package:
     - jest.config.json
   include:
     - '*.key'
-    - '*.key.pub'
+    - '*.pub'
   individually: true
 
 custom:
@@ -74,7 +74,7 @@ provider:
     COGNITO_REDIRECT_URI: https://plankton.auth.sa-east-1.amazoncognito.com/oauth2/idpresponse # change for custom domain
     SECRET_CERT_KEY: ${self:custom.${self:custom.stage}.secretCertKey}
     SECRET_CERT_PUB: ${self:custom.${self:custom.stage}.secretCertPub}
-    GITHUB_CERT_PUBLIC: github.key.pub
+    GITHUB_CERT_PUBLIC: github.pub
     GITHUB_CERT_KEY: github.key
   deploymentBucket:
     name: serverless.tag.deployment
