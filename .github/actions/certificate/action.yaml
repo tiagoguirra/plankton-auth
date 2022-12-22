@@ -18,11 +18,11 @@ runs:
       env:
         CERT_KEY: ${{ inputs.cert-key }}
       run: |
-        echo "$CERT_KEY" | base64 --decode > ${HOME}/${{ inputs.cert-key }}.key
+        echo "$CERT_KEY" > ${HOME}/${{ inputs.cert-key }}.key
 
     - name: Write pub
       shell: bash
       env:
-        CERT_KEY: ${{ inputs.cert-pub }}
+        CERT_PUB: ${{ inputs.cert-pub }}
       run: |
-        echo "$CERT_KEY" | base64 --decode > ${HOME}/${{ inputs.cert-key }}.pub
+        echo "$CERT_PUB" > ${HOME}/${{ inputs.cert-key }}.pub
