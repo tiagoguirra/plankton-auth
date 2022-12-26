@@ -32,8 +32,8 @@ export class CognitoService {
       },
       SourceUser: {
         ProviderAttributeName: 'Cognito_Subject',
-        ProviderAttributeValue: providerName,
-        ProviderName: providerUserId
+        ProviderAttributeValue: providerUserId,
+        ProviderName: providerName
       },
       UserPoolId: this.userPoolId
     }
