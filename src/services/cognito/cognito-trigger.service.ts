@@ -45,8 +45,6 @@ export class CognitoTriggerService {
         providerUserId,
         cognitoNativeUsername
       )
-
-      await this.cognito.addUserToGroup(cognitoNativeUsername, 'Users')
     }
   }
 }

@@ -36,7 +36,6 @@ describe('CognitoTriggerService', () => {
       .mockResolvedValue({ ...mockUser, Username: 'mock@gmail.com' })
     jest.spyOn(service.cognito, 'setPassword').mockResolvedValue()
     jest.spyOn(service.cognito, 'linkUserAccounts').mockResolvedValue()
-    jest.spyOn(service.cognito, 'addUserToGroup').mockResolvedValue()
 
     await service.preSignUpExternalProvider({
       name: 'mock user',

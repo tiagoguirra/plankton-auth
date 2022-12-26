@@ -33,7 +33,7 @@ describe('CognitoService', () => {
         promise: () => Promise.resolve()
       }))
 
-    await service.linkUserAccounts('1234567890', 'Google', 'user123')
+    await service.linkUserAccounts('Google', '1234567890', 'user123')
 
     expect(service.cognito.adminLinkProviderForUser).toHaveBeenCalledWith({
       DestinationUser: {
