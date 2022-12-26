@@ -87,10 +87,6 @@ functions:
     handler: src/functions/github/jwks.handler
   cognitoPreSignUp:
     handler: src/functions/cognito/preSignUp.handler
-    events:
-      - cognitoUserPool:
-          pool: ${self:custom.${self:custom.stage}.userPool}
-          trigger: PreSignUp
     iamRoleStatementsInherit: true
     iamRoleStatements:
       - Effect: Allow
@@ -118,6 +114,8 @@ resources:
           PasswordPolicy:
             MinimumLength: 6
         AutoVerifiedAttributes: ["email"]
+        LambdaConfig:
+          PreSignUp: { "Fn::GetAtt": ["cognitoPreSignUp", "Arn"] }
 
     UserClient:
       Type: AWS::Cognito::UserPoolClient
