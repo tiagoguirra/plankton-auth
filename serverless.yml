@@ -91,6 +91,18 @@ functions:
       - cognitoUserPool:
           pool: ${self:custom.${self:custom.stage}.userPool}
           trigger: PreSignUp
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action: 
+          - cognito-idp:AdminAddUserToGroup
+          - cognito-idp:AdminUpdateUserAttributes
+          - cognito-idp:ListUsers
+          - cognito-idp:AdminLinkProviderForUser
+          - cognito-idp:AdminCreateUser
+          - cognito-idp:AdminSetUserPassword
+        Resource:
+          - Fn::GetAtt: UserPool.Arn
 
 resources:
   Resources:
