@@ -102,7 +102,7 @@ functions:
           - cognito-idp:AdminCreateUser
           - cognito-idp:AdminSetUserPassword
         Resource:
-          - Fn::GetAtt: UserPool.Arn
+          - Fn::GetAtt: [ UserPool, Arn ]
 
 resources:
   Resources:
