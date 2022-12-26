@@ -21,8 +21,8 @@ export class CognitoService {
   }
 
   async linkUserAccounts(
-    providerUserId: string,
     providerName: string,
+    providerUserId: string,
     username: string
   ): Promise<void> {
     const params = {
