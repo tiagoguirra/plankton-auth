@@ -17,15 +17,3 @@ export interface OAuthUser {
   email_verified: boolean
   token?: string
 }
-
-export interface OAuthService extends OAuthToken {
-  userId: string
-  provider: string
-}
-
-export interface OauthConfig {
-  clientId: string
-  clientSecret: string
-  redirectUri: string
-  tokenEnpoint: string
-}

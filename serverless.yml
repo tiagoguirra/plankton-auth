@@ -34,7 +34,7 @@ custom:
   swaggerApi:
     swagger: ${file(docs/swagger.yaml)}
   customDomain:
-    domainName: auth.api.planktondoc.com
+    domainName: auth.planktondoc.com
     stage: ${self:custom.stage}
     basePath: ${self:custom.stage}
     certificateName: 'planktondoc.com'
@@ -85,6 +85,12 @@ functions:
     handler: src/functions/github/userInfo.handler
   githubJwks:
     handler: src/functions/github/jwks.handler
+  cognitoPreSignUp:
+    handler: src/functions/cognito/preSignUp.handler
+    events:
+      - cognitoUserPool:
+          pool: ${self:custom.${self:custom.stage}.userPool}
+          trigger: PreSignUp
 
 resources:
   Resources:
