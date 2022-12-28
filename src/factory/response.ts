@@ -2,7 +2,7 @@ import { CustomException } from '../types/exceptions'
 import { ApiGatewayResponse } from '../types/response'
 import { resolveException } from './exception'
 
-const response = (message: any, code: number): ApiGatewayResponse => {
+const response = <T = any>(message: T, code: number): ApiGatewayResponse => {
   return {
     statusCode: code,
     headers: {

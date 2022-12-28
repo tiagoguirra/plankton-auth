@@ -151,7 +151,34 @@ paths:
       x-attr-serverless:
         functionName: githubJwks
         cors: true
-  
+  /user/identity/{provider}:
+    get:
+      summary: Get user identity
+      description: Get user identity
+      tags:
+        - signin
+      parameters:
+        - name: "provider"
+          in: "path"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200': 
+          description: Response with user identity
+        '400':
+          description: Bad request.
+        '401':
+          description: Not authorized.
+        '500':
+          description: Server internal error.
+      x-attr-serverless:
+        functionName: getUserIdentity
+        cors: true
+        authorizer:
+          name: auth
+          arn: arn:aws:cognito-idp:sa-east-1:174628554481:userpool/${self:custom.${self:custom.stage}.userPoolId}
+          type: COGNITO_USER_POOLS
       
 components:
   schemas:

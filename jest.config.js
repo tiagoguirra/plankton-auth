@@ -18,6 +18,11 @@ module.exports = {
   collectCoverage: true,
   coveragePathIgnorePatterns: ['/node_modules/'],
   setupFiles: ['<rootDir>/setEnvVars.js'],
+  testEnvironment: 'jest-dynalite/environment',
+  setupFilesAfterEnv: [
+    'jest-dynalite/setupTables',
+    'jest-dynalite/clearAfterEach'
+  ],
   transform: {
     '^.+\\.ts?$': [
       'esbuild-jest',

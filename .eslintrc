@@ -32,6 +32,7 @@
     "eol-last": "off",
     "@typescript-eslint/restrict-template-expressions": "off",
     "@typescript-eslint/space-before-function-paren": "off",
+    "indent": "off",
     "@typescript-eslint/indent": "warn",
     "@typescript-eslint/return-await": "off"
   },

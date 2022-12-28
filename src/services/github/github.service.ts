@@ -13,6 +13,7 @@ import { OpenIDJwks, OpenIDTokenRequest } from '../../types/openid'
 import secretService from '../secret/secret.service'
 import certificateService from '../certificate/certificate.service'
 import { ErrorAuthenticateException } from '../../types/exceptions'
+import identityService from '../identity/identity.service'
 
 class GitHubService {
   getCredentials(): Promise<GithubCredentials> {
@@ -49,6 +50,29 @@ class GitHubService {
     })
   }
 
+  async saveIdentity(credentials: OAuthToken): Promise<void> {
+    const { data: user } = await axios.get<GithubUser | GithubError>(
+      `${process.env.GITHUB_API_URL}/user`,
+      {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: `token ${credentials.access_token}`
+        }
+      }
+    )
+
+    if ('error' in user) {
+      console.error(user)
+      throw new ErrorAuthenticateException(user.error_description)
+    }
+
+    await identityService.update(
+      process.env.GITHUB_PROVIDER_NAME,
+      String(user.id),
+      credentials
+    )
+  }
+
   async accessToken(
     client: OpenIDTokenRequest,
     issuer: string
@@ -82,11 +106,15 @@ class GitHubService {
     const idToken = this.generateIdToken(client.client_id, issuer, certificate)
     const scope = `openid ${data.scope.replace(',', ' ')}`
 
-    return {
+    const credentials = {
       ...data,
       scope,
       id_token: idToken
     }
+
+    await this.saveIdentity(credentials)
+
+    return credentials
   }
 
   async userInfo(accessToken: string): Promise<OAuthUser> {

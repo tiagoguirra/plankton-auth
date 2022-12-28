@@ -1,3 +1,4 @@
+import { CognitoIdentityServiceProvider } from 'aws-sdk'
 import { PreSignUp } from '../../types/cognito'
 import { generatePassword } from '../../utils/password'
 import { CognitoService } from './cognito.service'
@@ -13,7 +14,7 @@ export class CognitoTriggerService {
     name,
     username,
     email
-  }: PreSignUp): Promise<void> {
+  }: PreSignUp): Promise<CognitoIdentityServiceProvider.UserType> {
     const users = await this.cognito.listByEmail(email)
     const [providerNameValue, providerUserId] = username.split('_')
 
@@ -29,6 +30,7 @@ export class CognitoTriggerService {
         providerUserId,
         cognitoUsername
       )
+      return null
     } else {
       const createdCognitoUser = await this.cognito.createUser({
         email,
@@ -45,6 +47,8 @@ export class CognitoTriggerService {
         providerUserId,
         cognitoNativeUsername
       )
+
+      return createdCognitoUser
     }
   }
 }

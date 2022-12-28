@@ -1,4 +1,4 @@
-import { mockPreSignUpTriggerEvent } from '../../mock/cognito.mock'
+import { mockPreSignUpTriggerEvent, mockUser } from '../../mock/cognito.mock'
 import { CognitoTriggerService } from '../../services/cognito/cognito-trigger.service'
 import { handler } from './preSignUp'
 
@@ -11,7 +11,7 @@ describe('CognitoService', () => {
 
     jest
       .spyOn(CognitoTriggerService.prototype, 'preSignUpExternalProvider')
-      .mockResolvedValue()
+      .mockResolvedValue(mockUser)
 
     const response = await handler(mockPreSignUpTriggerEvent)
 
@@ -22,14 +22,7 @@ describe('CognitoService', () => {
       username: 'google_1234567890',
       email: 'mock@google.com'
     })
-    expect(response).toEqual({
-      ...mockPreSignUpTriggerEvent,
-      response: {
-        ...mockPreSignUpTriggerEvent.response,
-        autoConfirmUser: true,
-        autoVerifyEmail: true
-      }
-    })
+    expect(response).toEqual(mockPreSignUpTriggerEvent)
   })
 
   it('should do nothing if not external provider', async () => {
@@ -37,7 +30,7 @@ describe('CognitoService', () => {
 
     jest
       .spyOn(CognitoTriggerService.prototype, 'preSignUpExternalProvider')
-      .mockResolvedValue()
+      .mockResolvedValue(mockUser)
 
     const response = await handler({
       ...mockPreSignUpTriggerEvent,

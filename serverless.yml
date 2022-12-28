@@ -49,11 +49,17 @@ custom:
     logRetentionInDays: 5
     userPool: plankton-pool-staging
     userClient: plankton-client-staging
+    tableIdentity: plankton-identity-staging
+    githubProviderName: Github-staging
+    userPoolId: sa-east-1_1RMJOWfmm
   production:
     stage: production
     logRetentionInDays: 60
     userPool: plankton-pool-production
     userClient: plankton-client-production
+    tableIdentity: plankton-identity-production
+    githubProviderName: Github-production
+    userPoolId: sa-east-1_1RMJOWfmm
 
 provider:
   name: aws
@@ -73,6 +79,8 @@ provider:
     COGNITO_REDIRECT_URI: https://plankton.auth.sa-east-1.amazoncognito.com/oauth2/idpresponse
     GITHUB_CERT_PUBLIC: github.pub
     GITHUB_CERT_KEY: github.key
+    TABLE_IDENTITY: ${self:custom.${self:custom.stage}.tableIdentity}
+    GITHUB_PROVIDER_NAME: ${self:custom.${self:custom.stage}.githubProviderName}
   deploymentBucket:
     name: serverless.tag.deployment
 
@@ -81,10 +89,26 @@ functions:
     handler: src/functions/github/authorizer.handler
   githubToken:
     handler: src/functions/github/token.handler
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action: 
+          - dynamodb:UpdateItem
+        Resource:
+          - "arn:aws:dynamodb:sa-east-1:174628554481:table/${self:custom.${self:custom.stage}.tableIdentity}"
   githubUser:
     handler: src/functions/github/userInfo.handler
   githubJwks:
     handler: src/functions/github/jwks.handler
+  getUserIdentity: 
+    handler: src/functions/user/getIdentity.handler
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action: 
+          - dynamodb:GetItem
+        Resource:
+          - "arn:aws:dynamodb:sa-east-1:174628554481:table/${self:custom.${self:custom.stage}.tableIdentity}"
   cognitoPreSignUp:
     handler: src/functions/cognito/preSignUp.handler
     events:
@@ -106,6 +130,30 @@ functions:
 
 resources:
   Resources:
+    TableIdentity:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.${self:custom.stage}.tableIdentity}
+        AttributeDefinitions:
+          - AttributeName: identityId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: providerName
+            AttributeType: S
+        KeySchema:
+          - AttributeName: identityId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: userId-providerName-index
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: providerName
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
     UserPool:
       Type: AWS::Cognito::UserPool
       Properties:

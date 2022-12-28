@@ -20,14 +20,16 @@ export const handler = async (
     if (triggerSource === EXTERNAL_AUTHENTICATION_PROVIDER) {
       const cognitoService = new CognitoTriggerService(userPoolId)
 
-      await cognitoService.preSignUpExternalProvider({
+      const user = await cognitoService.preSignUpExternalProvider({
         name,
         username: userName,
         email
       })
-
-      event.response.autoVerifyEmail = true
-      event.response.autoConfirmUser = true
+      // If created user, auto verify email and auto confirm user
+      if (user) {
+        event.response.autoVerifyEmail = true
+        event.response.autoConfirmUser = true
+      }
     }
     return event
   } catch (err) {

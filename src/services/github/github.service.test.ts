@@ -15,6 +15,8 @@ import secretService from '../secret/secret.service'
 import githubService from './github.service'
 import certificateService from '../certificate/certificate.service'
 import { ErrorAuthenticateException } from '../../types/exceptions'
+import identityService from '../identity/identity.service'
+import { identityMock } from '../../mock/identity.mock'
 
 describe('GithubService suit test', () => {
   const mockIdToken = 'eyJhbGciOi'
@@ -35,6 +37,7 @@ describe('GithubService suit test', () => {
       .spyOn(certificateService, 'public')
       .mockResolvedValue(mockCertificatePub)
     jest.spyOn(certificateService, 'key').mockResolvedValue(mockCertificateKey)
+    jest.spyOn(identityService, 'update').mockResolvedValue(identityMock)
   })
 
   beforeEach(() => {
@@ -95,11 +98,12 @@ describe('GithubService suit test', () => {
   })
 
   it('should request and return access token', async () => {
-    expect.assertions(4)
+    expect.assertions(6)
 
     jest.spyOn(axios, 'post').mockResolvedValueOnce({
       data: mockGitHubAccessToken
     })
+    jest.spyOn(axios, 'get').mockResolvedValueOnce({ data: mockGitHubUser })
 
     const accessToken = await githubService.accessToken(
       {
@@ -138,6 +142,24 @@ describe('GithubService suit test', () => {
       id_token: 'eyJhbGciOi',
       scope: 'openid user emails'
     })
+    expect(axios.get).toHaveBeenCalledWith(
+      `${process.env.GITHUB_API_URL}/user`,
+      {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: `token ${mockGitHubAccessToken.access_token}`
+        }
+      }
+    )
+    expect(identityService.update).toHaveBeenCalledWith(
+      process.env.GITHUB_PROVIDER_NAME,
+      String(mockGitHubUser.id),
+      {
+        ...mockGitHubAccessToken,
+        id_token: 'eyJhbGciOi',
+        scope: 'openid user emails'
+      }
+    )
   })
 
   it('should return exception from token response', async () => {
